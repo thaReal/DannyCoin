@@ -3,7 +3,7 @@
 
 #include <QRegExpValidator>
 
-/** Base48 entry widget validator.
+/* Base48 entry widget validator.
    Corrects near-miss characters and refuses characters that are no part of base48.
  */
 class BitcoinAddressValidator : public QValidator
@@ -14,7 +14,7 @@ public:
 
     State validate(QString &input, int &pos) const;
 
-    static const int MaxAddressLength = 35;
+    static const int MaxAddressLength = 44;
 signals:
 
 public slots:

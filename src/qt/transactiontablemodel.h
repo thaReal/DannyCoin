@@ -9,8 +9,6 @@ class TransactionTablePriv;
 class TransactionRecord;
 class WalletModel;
 
-/** UI model for the transaction table of a wallet.
- */
 class TransactionTableModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -18,65 +16,59 @@ public:
     explicit TransactionTableModel(CWallet* wallet, WalletModel *parent = 0);
     ~TransactionTableModel();
 
-    enum ColumnIndex {
+    enum {
         Status = 0,
         Date = 1,
         Type = 2,
         ToAddress = 3,
         Amount = 4
-    };
+    } ColumnIndex;
 
-    /** Roles to get specific information from a transaction row.
-        These are independent of column.
-    */
-    enum RoleIndex {
-        /** Type of transaction */
+    // Roles to get specific information from a transaction row
+    // These are independent of column
+    enum {
+        // Type of transaction
         TypeRole = Qt::UserRole,
-        /** Date and time this transaction was created */
+        // Date and time this transaction was created
         DateRole,
-        /** Long description (HTML format) */
+        // Long description (HTML format)
         LongDescriptionRole,
-        /** Address of transaction */
+        // Address of transaction
         AddressRole,
-        /** Label of address related to transaction */
+        // Label of address related to transaction
         LabelRole,
-        /** Net amount of transaction */
-        AmountRole,
-        /** Unique identifier */
+        // Absolute net amount of transaction, for filtering
+        AbsoluteAmountRole,
+        // Unique identifier
         TxIDRole,
-        /** Is transaction confirmed? */
+        // Is transaction confirmed?
         ConfirmedRole,
-        /** Formatted amount, without brackets when unconfirmed */
+        // Formatted amount, without brackets when unconfirmed
         FormattedAmountRole
-    };
+    } RoleIndex;
 
     int rowCount(const QModelIndex &parent) const;
     int columnCount(const QModelIndex &parent) const;
     QVariant data(const QModelIndex &index, int role) const;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    Qt::ItemFlags flags(const QModelIndex &index) const;
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
 private:
     CWallet* wallet;
     WalletModel *walletModel;
     QStringList columns;
     TransactionTablePriv *priv;
-    int cachedNumBlocks;
 
-    QString lookupAddress(const std::string &address, bool tooltip) const;
-    QVariant addressColor(const TransactionRecord *wtx) const;
-    QString formatTxStatus(const TransactionRecord *wtx) const;
-    QString formatTxDate(const TransactionRecord *wtx) const;
-    QString formatTxType(const TransactionRecord *wtx) const;
-    QString formatTxToAddress(const TransactionRecord *wtx, bool tooltip) const;
-    QString formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed=true) const;
-    QString formatTooltip(const TransactionRecord *rec) const;
-    QVariant txStatusDecoration(const TransactionRecord *wtx) const;
-    QVariant txAddressDecoration(const TransactionRecord *wtx) const;
+    QString lookupAddress(const std::string &address) const;
+    QVariant formatTxStatus(const TransactionRecord *wtx) const;
+    QVariant formatTxDate(const TransactionRecord *wtx) const;
+    QVariant formatTxType(const TransactionRecord *wtx) const;
+    QVariant formatTxToAddress(const TransactionRecord *wtx) const;
+    QVariant formatTxAmount(const TransactionRecord *wtx, bool showUnconfirmed=true) const;
+    QVariant formatTxDecoration(const TransactionRecord *wtx) const;
 
-public slots:
-    void updateTransaction(const QString &hash, int status);
-    void updateConfirmations();
-    void updateDisplayUnit();
+private slots:
+    void update();
 
     friend class TransactionTablePriv;
 };

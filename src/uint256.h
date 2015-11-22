@@ -1,28 +1,33 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Copyright (c) 2011-2012 Litecoin Developers
 // Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_UINT256_H
 #define BITCOIN_UINT256_H
 
+#include "serialize.h"
+
 #include <limits.h>
-#include <stdio.h>
-#include <string.h>
 #include <string>
 #include <vector>
 
+#if defined(_MSC_VER) || defined(__BORLANDC__)
+typedef __int64  int64;
+typedef unsigned __int64  uint64;
+#else
 typedef long long  int64;
 typedef unsigned long long  uint64;
+#endif
+#if defined(_MSC_VER) && _MSC_VER < 1300
+#define for  if (false) ; else for
+#endif
 
 
 inline int Testuint256AdHoc(std::vector<std::string> vArg);
 
 
 
-/** Base class without constructors for uint256 and uint160.
- * This makes the compiler let u use it in a union.
- */
+// We have to keep a separate base class without constructors
+// so the compiler will let us use it in a union
 template<unsigned int BITS>
 class base_uint
 {
@@ -91,6 +96,13 @@ public:
     {
         pn[0] ^= (unsigned int)b;
         pn[1] ^= (unsigned int)(b >> 32);
+        return *this;
+    }
+
+    base_uint& operator&=(uint64 b)
+    {
+        pn[0] &= (unsigned int)b;
+        pn[1] &= (unsigned int)(b >> 32);
         return *this;
     }
 
@@ -288,7 +300,7 @@ public:
     std::string GetHex() const
     {
         char psz[sizeof(pn)*2 + 1];
-        for (unsigned int i = 0; i < sizeof(pn); i++)
+        for (int i = 0; i < sizeof(pn); i++)
             sprintf(psz + i*2, "%02x", ((unsigned char*)pn)[sizeof(pn) - i - 1]);
         return std::string(psz, psz + sizeof(pn)*2);
     }
@@ -307,9 +319,9 @@ public:
             psz += 2;
 
         // hex string to uint
-        static unsigned char phexdigit[256] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,1,2,3,4,5,6,7,8,9,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0 };
+        static char phexdigit[256] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,1,2,3,4,5,6,7,8,9,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0 };
         const char* pbegin = psz;
-        while (phexdigit[(unsigned char)*psz] || *psz == '0')
+        while (phexdigit[*psz] || *psz == '0')
             psz++;
         psz--;
         unsigned char* p1 = (unsigned char*)pn;
@@ -350,27 +362,20 @@ public:
         return sizeof(pn);
     }
 
-    uint64 Get64(int n=0) const
-    {
-        return pn[2*n] | (uint64)pn[2*n+1] << 32;
-    }
 
-//    unsigned int GetSerializeSize(int nType=0, int nVersion=PROTOCOL_VERSION) const
-    unsigned int GetSerializeSize(int nType, int nVersion) const
+    unsigned int GetSerializeSize(int nType=0, int nVersion=VERSION) const
     {
         return sizeof(pn);
     }
 
     template<typename Stream>
-//    void Serialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION) const
-    void Serialize(Stream& s, int nType, int nVersion) const
+    void Serialize(Stream& s, int nType=0, int nVersion=VERSION) const
     {
         s.write((char*)pn, sizeof(pn));
     }
 
     template<typename Stream>
-//    void Unserialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION)
-    void Unserialize(Stream& s, int nType, int nVersion)
+    void Unserialize(Stream& s, int nType=0, int nVersion=VERSION)
     {
         s.read((char*)pn, sizeof(pn));
     }
@@ -398,7 +403,6 @@ typedef base_uint<256> base_uint256;
 // uint160
 //
 
-/** 160-bit unsigned integer */
 class uint160 : public base_uint160
 {
 public:
@@ -513,7 +517,6 @@ inline const uint160 operator-(const uint160& a, const uint160& b)      { return
 // uint256
 //
 
-/** 256-bit unsigned integer */
 class uint256 : public base_uint256
 {
 public:
@@ -627,7 +630,7 @@ inline const uint256 operator-(const uint256& a, const uint256& b)      { return
 
 
 
-#ifdef TEST_UINT256
+
 
 inline int Testuint256AdHoc(std::vector<std::string> vArg)
 {
@@ -758,7 +761,5 @@ inline int Testuint256AdHoc(std::vector<std::string> vArg)
 
     return (0);
 }
-
-#endif
 
 #endif

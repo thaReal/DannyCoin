@@ -3,52 +3,43 @@
 
 #include <QDialog>
 
-namespace Ui {
-class OptionsDialog;
-}
+QT_BEGIN_NAMESPACE
+class QStackedWidget;
+class QListWidget;
+class QListWidgetItem;
+class QPushButton;
+QT_END_NAMESPACE
 class OptionsModel;
+class MainOptionsPage;
 class MonitoredDataMapper;
 
-/** Preferences dialog. */
 class OptionsDialog : public QDialog
 {
     Q_OBJECT
-
 public:
-    explicit OptionsDialog(QWidget *parent = 0);
-    ~OptionsDialog();
+    explicit OptionsDialog(QWidget *parent=0);
 
     void setModel(OptionsModel *model);
-    void setMapper();
-
-protected:
-    bool eventFilter(QObject *object, QEvent *event);
-
-private slots:
-    /* enable apply button and OK button */
-    void enableSaveButtons();
-    /* disable apply button and OK button */
-    void disableSaveButtons();
-    /* set apply button and OK button state (enabled / disabled) */
-    void setSaveButtonState(bool fState);
-    void on_okButton_clicked();
-    void on_cancelButton_clicked();
-    void on_applyButton_clicked();
-
-    void showRestartWarning_Proxy();
-    void showRestartWarning_Lang();
-    void updateDisplayUnit();
 
 signals:
-    void proxyIpValid(bool fValid);
 
+public slots:
+    void changePage(QListWidgetItem *current, QListWidgetItem *previous);
+private slots:
+    void okClicked();
+    void cancelClicked();
+    void applyClicked();
+    void enableApply();
+    void disableApply();
 private:
-    Ui::OptionsDialog *ui;
+    QListWidget *contents_widget;
+    QStackedWidget *pages_widget;
+    MainOptionsPage *main_options_page;
     OptionsModel *model;
     MonitoredDataMapper *mapper;
-    bool fRestartWarningDisplayed_Proxy;
-    bool fRestartWarningDisplayed_Lang;
-    bool fProxyIpValid;
+    QPushButton *apply_button;
+
+    void setupMainPage();
 };
 
 #endif // OPTIONSDIALOG_H

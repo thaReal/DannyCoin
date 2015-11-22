@@ -54,10 +54,9 @@ void EditAddressDialog::loadRow(int row)
     mapper->setCurrentIndex(row);
 }
 
-bool EditAddressDialog::saveCurrentRow()
+QString EditAddressDialog::saveCurrentRow()
 {
-    if(!model)
-        return false;
+    QString address;
     switch(mode)
     {
     case NewReceivingAddress:
@@ -75,54 +74,30 @@ bool EditAddressDialog::saveCurrentRow()
         }
         break;
     }
-    return !address.isEmpty();
+    return address;
 }
 
 void EditAddressDialog::accept()
 {
-    if(!model)
-        return;
-    if(!saveCurrentRow())
+    if(mode == NewSendingAddress || mode == EditSendingAddress)
     {
-        switch(model->getEditStatus())
+        // For sending addresses, check validity
+        // Not needed for receiving addresses, as those are generated
+        if(!model->validateAddress(ui->addressEdit->text()))
         {
-        case AddressTableModel::DUPLICATE_ADDRESS:
             QMessageBox::warning(this, windowTitle(),
-                tr("The entered address \"%1\" is already in the address book.").arg(ui->addressEdit->text()),
-                QMessageBox::Ok, QMessageBox::Ok);
-            break;
-        case AddressTableModel::INVALID_ADDRESS:
-            QMessageBox::warning(this, windowTitle(),
-                tr("The entered address \"%1\" is not a valid DannyCoin address.").arg(ui->addressEdit->text()),
+                tr("The entered address \"%1\" is not a valid Tenebrix address.").arg(ui->addressEdit->text()),
                 QMessageBox::Ok, QMessageBox::Ok);
             return;
-        case AddressTableModel::WALLET_UNLOCK_FAILURE:
-            QMessageBox::critical(this, windowTitle(),
-                tr("Could not unlock wallet."),
-                QMessageBox::Ok, QMessageBox::Ok);
-            return;
-        case AddressTableModel::KEY_GENERATION_FAILURE:
-            QMessageBox::critical(this, windowTitle(),
-                tr("New key generation failed."),
-                QMessageBox::Ok, QMessageBox::Ok);
-            return;
-        case AddressTableModel::OK:
-            // Failed with unknown reason. Just reject.
-            break;
         }
-
+    }
+    if(saveCurrentRow().isEmpty())
+    {
+        QMessageBox::warning(this, windowTitle(),
+            tr("The entered address \"%1\" is already in the address book.").arg(ui->addressEdit->text()),
+            QMessageBox::Ok, QMessageBox::Ok);
         return;
     }
     QDialog::accept();
 }
 
-QString EditAddressDialog::getAddress() const
-{
-    return address;
-}
-
-void EditAddressDialog::setAddress(const QString &address)
-{
-    this->address = address;
-    ui->addressEdit->setText(address);
-}

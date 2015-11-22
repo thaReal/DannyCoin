@@ -2,8 +2,7 @@
 #include "transactiontablemodel.h"
 
 #include <QDateTime>
-
-#include <cstdlib>
+#include <QDebug>
 
 // Earliest date that can be represented (far in the past)
 const QDateTime TransactionFilterProxy::MIN_DATE = QDateTime::fromTime_t(0);
@@ -16,8 +15,7 @@ TransactionFilterProxy::TransactionFilterProxy(QObject *parent) :
     dateTo(MAX_DATE),
     addrPrefix(),
     typeFilter(ALL_TYPES),
-    minAmount(0),
-    limitRows(-1)
+    minAmount(0)
 {
 }
 
@@ -29,13 +27,13 @@ bool TransactionFilterProxy::filterAcceptsRow(int sourceRow, const QModelIndex &
     QDateTime datetime = index.data(TransactionTableModel::DateRole).toDateTime();
     QString address = index.data(TransactionTableModel::AddressRole).toString();
     QString label = index.data(TransactionTableModel::LabelRole).toString();
-    qint64 amount = llabs(index.data(TransactionTableModel::AmountRole).toLongLong());
+    qint64 amount = index.data(TransactionTableModel::AbsoluteAmountRole).toLongLong();
 
     if(!(TYPE(type) & typeFilter))
         return false;
     if(datetime < dateFrom || datetime > dateTo)
         return false;
-    if (!address.contains(addrPrefix, Qt::CaseInsensitive) && !label.contains(addrPrefix, Qt::CaseInsensitive))
+    if(!address.startsWith(addrPrefix) && !label.startsWith(addrPrefix))
         return false;
     if(amount < minAmount)
         return false;
@@ -66,21 +64,4 @@ void TransactionFilterProxy::setMinAmount(qint64 minimum)
 {
     this->minAmount = minimum;
     invalidateFilter();
-}
-
-void TransactionFilterProxy::setLimit(int limit)
-{
-    this->limitRows = limit;
-}
-
-int TransactionFilterProxy::rowCount(const QModelIndex &parent) const
-{
-    if(limitRows != -1)
-    {
-        return std::min(QSortFilterProxyModel::rowCount(parent), limitRows);
-    }
-    else
-    {
-        return QSortFilterProxyModel::rowCount(parent);
-    }
 }

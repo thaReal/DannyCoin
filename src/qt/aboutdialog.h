@@ -8,7 +8,6 @@ namespace Ui {
 }
 class ClientModel;
 
-/** "About" dialog box */
 class AboutDialog : public QDialog
 {
     Q_OBJECT

@@ -1,8 +1,6 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2012 The Bitcoin developers
-// Copyright (c) 2011-2012 Litecoin Developers
 // Distributed under the MIT/X11 software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file license.txt or http://www.opensource.org/licenses/mit-license.php.
 #ifndef BITCOIN_BIGNUM_H
 #define BITCOIN_BIGNUM_H
 
@@ -10,9 +8,8 @@
 #include <vector>
 #include <openssl/bn.h>
 
-#include "util.h" // for uint64
+#include "util.h"
 
-/** Errors thrown by the bignum class */
 class bignum_error : public std::runtime_error
 {
 public:
@@ -20,7 +17,7 @@ public:
 };
 
 
-/** RAII encapsulated BN_CTX (OpenSSL bignum context) */
+
 class CAutoBN_CTX
 {
 protected:
@@ -48,7 +45,7 @@ public:
 };
 
 
-/** C++ wrapper for BIGNUM (OpenSSL bignum) */
+
 class CBigNum : public BIGNUM
 {
 public:
@@ -79,8 +76,7 @@ public:
         BN_clear_free(this);
     }
 
-    //CBigNum(char n) is not portable.  Use 'signed char' or 'unsigned char'.
-    CBigNum(signed char n)      { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
+    CBigNum(char n)             { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
     CBigNum(short n)            { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
     CBigNum(int n)              { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
     CBigNum(long n)             { BN_init(this); if (n >= 0) setulong(n); else setint64(n); }
@@ -118,29 +114,21 @@ public:
     {
         unsigned long n = BN_get_word(this);
         if (!BN_is_negative(this))
-            return (n > (unsigned long)std::numeric_limits<int>::max() ? std::numeric_limits<int>::max() : n);
+            return (n > INT_MAX ? INT_MAX : n);
         else
-            return (n > (unsigned long)std::numeric_limits<int>::max() ? std::numeric_limits<int>::min() : -(int)n);
+            return (n > INT_MAX ? INT_MIN : -(int)n);
     }
 
-    void setint64(int64 sn)
+    void setint64(int64 n)
     {
-        unsigned char pch[sizeof(sn) + 6];
+        unsigned char pch[sizeof(n) + 6];
         unsigned char* p = pch + 4;
-        bool fNegative;
-        uint64 n;
-
-        if (sn < (int64)0)
+        bool fNegative = false;
+        if (n < (int64)0)
         {
-            // Since the minimum signed integer cannot be represented as positive so long as its type is signed, and it's not well-defined what happens if you make it unsigned before negating it, we instead increment the negative integer by 1, convert it, then increment the (now positive) unsigned integer by 1 to compensate
-            n = -(sn + 1);
-            ++n;
+            n = -n;
             fNegative = true;
-        } else {
-            n = sn;
-            fNegative = false;
         }
-
         bool fLeadingZeroes = true;
         for (int i = 0; i < 8; i++)
         {
@@ -231,7 +219,7 @@ public:
         if (vch.size() > 4)
             vch[4] &= 0x7f;
         uint256 n = 0;
-        for (unsigned int i = 0, j = vch.size()-1; i < sizeof(n) && j >= 4; i++, j--)
+        for (int i = 0, j = vch.size()-1; i < sizeof(n) && j >= 4; i++, j--)
             ((unsigned char*)&n)[i] = vch[j];
         return n;
     }
@@ -254,7 +242,7 @@ public:
     std::vector<unsigned char> getvch() const
     {
         unsigned int nSize = BN_bn2mpi(this, NULL);
-        if (nSize <= 4)
+        if (nSize < 4)
             return std::vector<unsigned char>();
         std::vector<unsigned char> vch(nSize);
         BN_bn2mpi(this, &vch[0]);
@@ -306,12 +294,12 @@ public:
             psz++;
 
         // hex string to bignum
-        static signed char phexdigit[256] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,1,2,3,4,5,6,7,8,9,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0 };
+        static char phexdigit[256] = { 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,1,2,3,4,5,6,7,8,9,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0, 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0, 0,0xa,0xb,0xc,0xd,0xe,0xf,0,0,0,0,0,0,0,0,0 };
         *this = 0;
         while (isxdigit(*psz))
         {
             *this <<= 4;
-            int n = phexdigit[(unsigned char)*psz++];
+            int n = phexdigit[*psz++];
             *this += n;
         }
         if (fNegative)
@@ -349,19 +337,19 @@ public:
         return ToString(16);
     }
 
-    unsigned int GetSerializeSize(int nType=0, int nVersion=PROTOCOL_VERSION) const
+    unsigned int GetSerializeSize(int nType=0, int nVersion=VERSION) const
     {
         return ::GetSerializeSize(getvch(), nType, nVersion);
     }
 
     template<typename Stream>
-    void Serialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION) const
+    void Serialize(Stream& s, int nType=0, int nVersion=VERSION) const
     {
         ::Serialize(s, getvch(), nType, nVersion);
     }
 
     template<typename Stream>
-    void Unserialize(Stream& s, int nType=0, int nVersion=PROTOCOL_VERSION)
+    void Unserialize(Stream& s, int nType=0, int nVersion=VERSION)
     {
         std::vector<unsigned char> vch;
         ::Unserialize(s, vch, nType, nVersion);
