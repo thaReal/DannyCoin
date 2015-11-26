@@ -1,0 +1,10 @@
+gblock 11/26/2015
+=================
+
+block.nTime = 1448474752 
+block.nNonce = 115478896 
+block.GetHash = 0ac8e2da7824720455a493ca4c39faf81f48cf2a12267b88bd2d354109911ec4
+hashGenesisBlock = 0f6b7de8de037856768de150f1c32a0a1b3b3fecb620d2afaebc0221181b20eb
+block.hashMerkleRoot = 12e1a1529ded1e3c604d3da3a0af77539340d78618adaf3099b9a8fdaa66d7df
+
+# Took ~12hours to hash on an Ubuntu 14.04 VM w/ 8cores+8Gb RAM

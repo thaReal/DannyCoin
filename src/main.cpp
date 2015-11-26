@@ -1597,8 +1597,8 @@ bool LoadBlockIndex(bool fAllowNew)
         }
         else
         {
-            hashGenesisBlock = uint256("0x0f6b7de8de037856768de150f1c32a0a1b3b3fecb620d2afaebc0221181b20eb");
-            printf("testnet original hashGenesisBlock assigned for ver 2.20.0 \n");
+            hashGenesisBlock = uint256("0xac242a9d0ea076c3c5f0436fc601c4a8ca690b4a66ca4d0fd6c91fdb7b94bc37");
+            printf("testnet hashGenesisBlock test... \n");
         }
         //bnProofOfWorkLimit = CBigNum(~uint256(0) >> 28);
         bnProofOfWorkLimit = CBigNum(~uint256(0) >> GetArgIntxx(28,"-ProofOfWorkLimit"));
@@ -1751,7 +1751,7 @@ bool LoadBlockIndex(bool fAllowNew)
         }
         else
         {
-            assert(block.hashMerkleRoot == uint256("0x4e77ffdc1baa20ffffab9d901f418f7496b2a710e462ac4047accdb8b3b774f9"));
+            assert(block.hashMerkleRoot == uint256("0x9f9e8e691a71a8a57a658e56029c80646e4201725589dd68ddd5023303a54cf2"));
         }
         block.print();
         printf("block.GetHash() = %s \n", block.GetHash().ToString().c_str());

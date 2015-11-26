@@ -15,6 +15,7 @@ src/build.h
 *.qm
 Makefile
 dannycoin-qt
+tenebrix-qt
 
 ##resources cpp
 qrc_*.cpp
