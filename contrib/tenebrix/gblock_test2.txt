@@ -1,0 +1,17 @@
+gblock2 11/26/2015
+=================
+
+block.nTime = 1448582002 
+block.nNonce = 1448988 
+block.GetHash = 6745099b66d8d4cd4c659daf4ee7283622130d68148d491e1b6f20a22ac1b0d8
+hashGenesisBlock = 0f6b7de8de037856768de150f1c32a0a1b3b3fecb620d2afaebc0221181b20eb
+block.hashMerkleRoot = 12e1a1529ded1e3c604d3da3a0af77539340d78618adaf3099b9a8fdaa66d7df
+
+///Reference
+block_nBits=503316479
+#hex = 0x1dffffff
+
+
+# waaay easier difficulty - hashed in about 30s -> hope to be able 
+# to test blocks on isolated network much quicker with this version
+
