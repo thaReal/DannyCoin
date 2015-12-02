@@ -34,10 +34,10 @@ map<COutPoint, CInPoint> mapNextTx;
 
 map<uint256, CBlockIndex*> mapBlockIndex;
 
-uint256 hashGenesisBlock("0x000000000019d6689c085ae165831e934ff763ae46a2a6c172b3f1b60a8ce26f");
+uint256 hashGenesisBlock("0x");
 CBigNum bnProofOfWorkLimit(~uint256(0) >> 32);
-const int nTotalBlocksEstimate = 131000; // Conservative estimate of total nr of blocks on main chain
-const int nInitialBlockThreshold = 10000; // Regard blocks up until N-threshold as "initial download"
+const int nTotalBlocksEstimate = 0; // Conservative estimate of total nr of blocks on main chain
+const int nInitialBlockThreshold = 0; // Regard blocks up until N-threshold as "initial download"
 CBlockIndex* pindexGenesisBlock = NULL;
 int nBestHeight = -1;
 CBigNum bnBestChainWork = 0;
@@ -73,7 +73,7 @@ int fUseUPnP = false;
 
 
 
-static int64 nMaxMoney = 0;
+static int64 nMaxMoney = 300000000;
  
 void SetMaxMoney(int64 nValue) 
 {
@@ -101,7 +101,7 @@ int GetCoinbase_maturity()
        }
        else
        {
-           // COINBASE_MATURITY last I saw was default at 100           
+           // COINBASE_MATURITY: default of 100
            return COINBASE_MATURITY;           
        }  
 }
@@ -516,8 +516,10 @@ bool CTransaction::AcceptToMemoryPool(CTxDB& txdb, bool fCheckInputs, bool* pfMi
 
             CRITICAL_BLOCK(cs)
             {
+                // TODO: Update this for final difficulty
+                // for now, using 90s block target time
                 // Use an exponentially decaying ~10-minute window:
-                dFreeCount *= pow(1.0 - 1.0/600.0, (double)(nNow - nLastTime));
+                dFreeCount *= pow(1.0 - 1.0/90.0, (double)(nNow - nLastTime));
                 nLastTime = nNow;
                 // -limitfreerelay unit is thousand-bytes-per-minute
                 // At default rate it would take over a month to fill 1GB
@@ -725,8 +727,8 @@ uint256 static GetOrphanRoot(const CBlock* pblock)
 
 int64 static GetBlockValue(int nHeight, int64 nFees)
 {
-    //int64 nSubsidy = 50 * COIN;
-    int64 nSubsidy = (GetArgIntxx(50,"-Subsidy") * COIN);
+    int64 nSubsidy = 1500 * COIN;
+    //int64 nSubsidy = (GetArgIntxx(50,"-Subsidy") * COIN);
     if (mapArgs.count("-custom_inflation"))
     {
         if (nHeight>GetArgIntxx(100,"-inflation_triger"))
@@ -745,8 +747,8 @@ int64 static GetBlockValue(int nHeight, int64 nFees)
 
 unsigned int static GetNextWorkRequired(const CBlockIndex* pindexLast)
 {
-    const int64 nTargetTimespan = 7 * 24 * 60 * 60; // one week
-    const int64 nTargetSpacing = 5 * 60;
+    const int64 nTargetTimespan = 1 * 60 * 60; // one hour
+    const int64 nTargetSpacing = 90;
     const int64 nInterval = nTargetTimespan / nTargetSpacing;
 
     // Genesis block
@@ -1391,6 +1393,9 @@ bool CBlock::AcceptBlock()
         if (!tx.IsFinal(nHeight, GetBlockTime()))
             return error("AcceptBlock() : contains a non-final transaction");
 
+    //TODO: Merge modularized checkpoint updates
+
+    /*
     // Check that the block chain matches the known block chain up to a checkpoint
     if (!fTestNet)
         if ((nHeight == 100 && hash != uint256("0xaa6fbbc5b8885797a180c35918971e40d0459fd4299cbcaae7d3b5d551fa7d70")) ||
@@ -1401,6 +1406,7 @@ bool CBlock::AcceptBlock()
         if ((nHeight == 100 && hash != uint256("0xaa6fbbc5b8885797a180c35918971e40d0459fd4299cbcaae7d3b5d551fa7d70")) ||
             (nHeight == 152 && hash != uint256("0x7cf7e64cd5c770cf7315bc767e179a61d68815326c163a16b487639c006c9c70")))
             return error("AcceptBlock() : rejected by checkpoint lockin at %d", nHeight);
+    */
 
     // Write block to history file
     if (!CheckDiskSpace(::GetSerializeSize(*this, SER_DISK)))
@@ -1597,20 +1603,20 @@ bool LoadBlockIndex(bool fAllowNew)
         }
         else
         {
-            hashGenesisBlock = uint256("0xac242a9d0ea076c3c5f0436fc601c4a8ca690b4a66ca4d0fd6c91fdb7b94bc37");
+            hashGenesisBlock = uint256("0x");
             printf("testnet hashGenesisBlock test... \n");
         }
-        //bnProofOfWorkLimit = CBigNum(~uint256(0) >> 28);
-        bnProofOfWorkLimit = CBigNum(~uint256(0) >> GetArgIntxx(28,"-ProofOfWorkLimit"));
-        pchMessageStart[0] = GetCharArg(0xf9,"-pscMessageStart0");
-        pchMessageStart[1] = GetCharArg(0xda,"-pscMessageStart1");
-        pchMessageStart[2] = GetCharArg(0xb4,"-pscMessageStart2");
-        pchMessageStart[3] = GetCharArg(0xd9,"-pscMessageStart3");
+        bnProofOfWorkLimit = CBigNum(~uint256(0) >> 20);
+        //bnProofOfWorkLimit = CBigNum(~uint256(0) >> GetArgIntxx(28,"-ProofOfWorkLimit"));
+        //pchMessageStart[0] = GetCharArg(0xf9,"-pscMessageStart0");
+        //pchMessageStart[1] = GetCharArg(0xda,"-pscMessageStart1");
+        //pchMessageStart[2] = GetCharArg(0xb4,"-pscMessageStart2");
+        //pchMessageStart[3] = GetCharArg(0xd9,"-pscMessageStart3");
 
-        //pchMessageStart[0] = 0xfa;
-        //pchMessageStart[1] = 0xbf;
-        //pchMessageStart[2] = 0xb5;
-        //pchMessageStart[3] = 0xda;
+        pchMessageStart[0] = 0xf9;
+        pchMessageStart[1] = 0xda;
+        pchMessageStart[2] = 0xb4;
+        pchMessageStart[3] = 0xd9;
     }
     printf("hashGenesisBlock is now ");
     printf("%s\n", hashGenesisBlock.ToString().c_str());
@@ -1630,6 +1636,7 @@ bool LoadBlockIndex(bool fAllowNew)
     {
         if (!fAllowNew)
             return false;
+
         printf("creating new genesis block I hope \n");
         // Genesis Block:
         // CBlock(hash=000000000019d6, ver=1, hashPrevBlock=00000000000000, hashMerkleRoot=4a5e1e, nTime=1231006505, nBits=1d00ffff, nNonce=2083236893, vtx=1)
@@ -1649,11 +1656,11 @@ bool LoadBlockIndex(bool fAllowNew)
         txNew.vin.resize(1);
         txNew.vout.resize(1);
         
-        int nBits = GetArgIntxx( 486604799 , "-scriptSig_block_nBits");
+        int nBits = GetArgIntxx( 505348095, "-scriptSig_block_nBits");
         int extra = GetArgIntxx( 3 , "-GenesisBlock_extra");
         txNew.vin[0].scriptSig = CScript() << nBits << CBigNum(++extra) << vector<unsigned char>((const unsigned char*)pszTimestamp, (const unsigned char*)pszTimestamp + strlen(pszTimestamp));
         
-        txNew.vout[0].nValue = 50 * COIN;
+        txNew.vout[0].nValue = 1500 * COIN;
 
         if (mapArgs.count("-scriptPubKey"))
         {
@@ -1677,8 +1684,8 @@ bool LoadBlockIndex(bool fAllowNew)
         if (fTestNet)
         {
             block.nTime    = 1296688602;
-            block.nBits    = 0x1d07fff8;
-            block.nNonce   = 384568319;
+            block.nBits    = 0x1e1effff;
+            block.nNonce   = 0;
         }
 
        if (fTestNet_config && mapArgs.count("-block_nTime"))
