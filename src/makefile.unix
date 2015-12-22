@@ -120,7 +120,7 @@ OBJS= \
     obj/noui.o
 
 
-all: dannycoind
+all: StableCoind
 
 # auto-generated dependencies:
 -include obj/*.P
