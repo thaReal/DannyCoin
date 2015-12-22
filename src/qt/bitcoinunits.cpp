@@ -36,7 +36,7 @@ QString BitcoinUnits::name(int unit)
     {
     case BTC: return QString("DAN");
     case mBTC: return QString("mDAN");
-    case uBTC: return QString::fromUtf8("μDAN");
+    case uBTC: return QString("uDAN");
     default: return QString("???");
     }
 }
@@ -45,9 +45,9 @@ QString BitcoinUnits::description(int unit)
 {
     switch(unit)
     {
-    case BTC: return QString("DannyCoin");
-    case mBTC: return QString("Milli-DannyCoin (1 / 1,000)");
-    case uBTC: return QString("Micro-DannyCoin (1 / 1,000,000)");
+    case BTC: return QString("DannyCoins");
+    case mBTC: return QString("Milli-DannyCoins (1 / 1,000)");
+    case uBTC: return QString("Micro-DannyCoins (1 / 1,000,000)");
     default: return QString("???");
     }
 }

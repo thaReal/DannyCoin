@@ -1,41 +1,19 @@
-DannyCoin (DAN)
-===============
+StableCoin: Rethinking the altcoin from the bottom up
 
-An[other] experimental cryptocurrency with the goal of providing some innovative
-control on currency distribution. At the moment, the source code is based off of
-Smallchange (commit a19eb2dc3115a708e3a7f1c5855937aa33f1e132). WARNING: source
-code is still under construction and is in no way suitable for use for any 
-purpose whatsoever at this point.
+Extensive testing using network simulation software has shown that 40 seconds is the optimal block time. This allows ample time for blocks to propagate across the entire network. It gives us fast confirmations, while minimizing orphans and forking issues that we saw affect faster coins like WorldCoin. Long term, it will also help keep blockchain bloat down. Our testing has shown that a block time lower than 40 second makes a coin unsuitable for long term stability and growth.
 
+Scrypt was chosen as an encryption algorithm. Other candidates were Blue Midnight Wish, SHA3, and Skein. After much analysis we came to the conclusion that such algorithms make for a nice selling point, but fall short of Scrypt in terms of securing a blockchain. Our aim is to create the best coin possible, not lure you in with gimmicks.
 
-Initial Parameters
-------------------
-*TO BE UPDATED; still default values from smallchange source*
+We've changed the magic number for StableCoin. What is the magic number? It's an often overlooked, but very important, variable within the code of bitcoin. This value affects how the entire blockchain is formatted, and is a key factor in determining how peers are matched up over the network. Failure to change this value opens the door to many vectors of attack. Ever load up an coin client and have it start to download the Litecoin blockchain? That is because the developers of that coin neglected to change the magic number to a unique value.
 
-DannyCoin (DAN) - a 'faster' version of Litecoin which also uses scrypt
-as a proof of work scheme and is intended for microtransactions.
- - 15 seconds block targets: beat that MinCoin! ;)
- - 42 007 680 total coins
- - no subsidy within the first 3 days and after approximately 5 years;
-    in between: 4 coins per generated block
- - difficulty retargets every 0.35 days
- - currently peers are looked up over IRC only
- - currently no block checkpoints are in the code (but could be easily
-   added)
+Block reward is 25 coins per block, with a block target time of 40 seconds. Difficulty will be recalculated every 90 blocks, which is much lower than other coin releases. We choose this value for several reasons:
 
-Other than that, this coin is exactly like Litecoin and should by no
-means be used as a real cryptocurrency. All of the coin parameters
-are chosen arbitrarily or at most with 'fairness' towards everyone in mind.
+1) It allows the network to find it's natural difficulty much faster, ensuring a fair and accurate spread of coins.
+2) It prevents blockchain stalling from ever happening. No one likes having to issue a hardfork.
 
-Credits go to the original authors/communities that created Bitcoin and 
-Litecoin.
+We want StableCoin to be a steadily mined currency, not one that is pumped and dumped. These values will assist us in reaching that goal. A total of 250 million coins will be minted, with block reward halving every ~3.7 years.
+
+We believe the strongest asset a coin can have is active, talented developers. We will be on the forum daily answering questions and resolving issues, as well as helping to grow StableCoin by working behind the scenes to develop and deploy services that will ensure success. 
 
 
-To Do List:
------------
--> Update IRC address/channel (do I need a private irc server?)
--> Create initial block reward scheme to be used for testnet
--> Update/Tweak difficulty retarget algorithm - check testnet settings since 
-   that's where we'll be doing all initial testing
--> Create a seednode(s)
--> Sooo much more...
+-StableCoin Devs
